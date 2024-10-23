@@ -16,7 +16,7 @@
 ---
 
 
-## Expirience 
+## Experience 
 
 - Amco SA | 2022 - 2024 
     - Quality Assurance Engineer 
@@ -35,4 +35,4 @@
 - Python
 - Docker
 
----
+---`
