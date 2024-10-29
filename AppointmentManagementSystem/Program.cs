@@ -1,4 +1,5 @@
-﻿using AppointmentManagementSystem;
+﻿using AppointmentManagementSystem.Data.Models;
+using AppointmentManagementSystem.Data.Repositories;
 using AppointmentManagementSystem.Utilities;
 using Spectre.Console;
 
@@ -38,65 +39,70 @@ class Program
         };
 
 
-        
-        List<Customer> customersList = new List<Customer>();
-        List<Appointment> appointmentsList = new List<Appointment>();
-        Customer ex1 = new Customer("Manos Poulakakis","manolispoulakakis@gmail.com","6984153487");
-        Customer ex2 = new Customer("Fenia Giannakopoulou","feniagiannakopoulou@gmail.com","6943254612");
-        Customer ex3 = new Customer("Kostas Poulakakis","kospoul@gmail.com","6982806297");
+        List<Customer> initialCustomers = [];
+        var ex1 = new Customer(id: 1, name: "Manos Poulakakis", email: "manolispoulakakis@gmail.com", phone: "6984153487");
+        var ex2 = new Customer(id: 2, "Fenia Giannakopoulou", "feniagiannakopoulou@gmail.com", "6943254612");
+        var ex3 = new Customer(id: 3, "Kostas Poulakakis", "kospoul@gmail.com", "6982806297");
+        initialCustomers.Add(ex1);
+        initialCustomers.Add(ex2);
+        initialCustomers.Add(ex3);
 
-        customersList.Add(ex1);
-        customersList.Add(ex2);
-        customersList.Add(ex3);
+        var customerRepository = new InMemoryCustomerRepository(initialCustomers);
 
-        Appointment ap1 = new Appointment(ex1,"Massage",new DateTime(2024,11,15,20,0,0),"Deep tissue massage");
-        Appointment ap2 = new Appointment(ex2,"Massage",new DateTime(2024,11,15,20,0,0));
-        Appointment ap3 = new Appointment(ex3,"Massage",new DateTime(2024,11,15,20,0,0),"Full Body Training");
+
+        List<Appointment> appointmentsList = [];
+        Appointment ap1 = new Appointment(ex1, "Massage", new DateTime(2024, 11, 15, 20, 0, 0), "Deep tissue massage");
+        Appointment ap2 = new Appointment(ex2, "Massage", new DateTime(2024, 11, 15, 20, 0, 0));
+        Appointment ap3 = new Appointment(ex3, "Massage", new DateTime(2024, 11, 15, 20, 0, 0), "Full Body Training");
 
         appointmentsList.Add(ap1);
         appointmentsList.Add(ap2);
         appointmentsList.Add(ap3);
-        
+
 
         string action = string.Empty;
         string operation;
         do
         {
-        
-            operation = Utilities.Selector(operationSelector,"Please Select Action to be executed or Exit to close the application");
+
+            operation = Utilities.Selector(operationSelector, "Please Select Action to be executed or Exit to close the application");
             switch (operation)
             {
                 case "Customer Data":
-                    AnsiConsole.Markup($"[bold green]You Selected [red]{operation}[/][/]\n");       
+                    AnsiConsole.Markup($"[bold green]You Selected [red]{operation}[/][/]\n");
                     do
                     {
-                        action = Utilities.Selector(actionSelector,"Please Select Action to be executed or Exit to close the application");
+                        action = Utilities.Selector(actionSelector, "Please Select Action to be executed or Exit to close the application");
                         switch (action)
                         {
                             case "Create":
-                                Customer customer= new Customer(Utilities.CustomerFields("Full Name"), Utilities.CustomerFields("Email"), Utilities.CustomerFields("Phone"));
-                                customersList.Add(customer);
+                                // TODO: Use customerRepository
+                                Customer customer = new Customer(id: 0, Utilities.CustomerFields("Full Name"), Utilities.CustomerFields("Email"), Utilities.CustomerFields("Phone"));
+                                initialCustomers.Add(customer);
                                 break;
 
                             case "Read":
-                                Utilities.ReadCustomerData(customersList);
+                                // TODO: Use customerRepository
+                                Utilities.ReadCustomerData(initialCustomers);
                                 break;
 
                             case "Update":
                                 string updateEmail = Utilities.CliTextPrompt("Provide Customer Email");
-                                bool isCustomer = Utilities.CheckIfCustomerExists(updateEmail, customersList);
+                                bool isCustomer = Utilities.CheckIfCustomerExists(updateEmail, initialCustomers);
                                 if (isCustomer)
                                 {
-                                    string updateField = Utilities.Selector(fieldUpdateSelector,"Provide Customer Field That Needs To Be Upated");
+                                    string updateField = Utilities.Selector(fieldUpdateSelector, "Provide Customer Field That Needs To Be Upated");
                                     string updateValue = Utilities.CliTextPrompt($"Provide Updated {updateField}");
-                                    Utilities.UpdateCustomer(updateEmail, customersList, updateField, updateValue);
+                                    // TODO: Use customerRepository
+                                    Utilities.UpdateCustomer(updateEmail, initialCustomers, updateField, updateValue);
                                 }
                                 break;
 
                             case "Delete":
                                 string deleteEmail = Utilities.CliTextPrompt("Provide Customer Email");
                                 // isCustomer = Utilities.CheckIfCustomerExists(deleteEmail, customersList);
-                                Utilities.DeleteCustomer(deleteEmail, customersList);
+                                // TODO: Use customerRepository
+                                Utilities.DeleteCustomer(deleteEmail, initialCustomers);
                                 break;
 
                             default:
@@ -111,7 +117,7 @@ class Program
 
                     do
                     {
-                        action = Utilities.Selector(actionSelector,"Please Select Action to be executed or Exit to close the application");
+                        action = Utilities.Selector(actionSelector, "Please Select Action to be executed or Exit to close the application");
                         switch (action)
                         {
                             case "Create":
@@ -122,15 +128,15 @@ class Program
                                 break;
                             case "Delete":
                                 break;
-                            
+
                         }
 
                     } while (action != "Exit");
 
                     break;
                 default:
-                AnsiConsole.Markup($"[bold red]Exiting Application[/]\n");
-                break;
+                    AnsiConsole.Markup($"[bold red]Exiting Application[/]\n");
+                    break;
             }
         } while (operation != "Exit");
     }

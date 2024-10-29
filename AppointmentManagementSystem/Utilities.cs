@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Data.Common;
+using AppointmentManagementSystem.Data.Models;
 using Spectre.Console;
 namespace AppointmentManagementSystem.Utilities
 {
@@ -26,7 +27,7 @@ namespace AppointmentManagementSystem.Utilities
             var customerTable = new Table();
             customerTable.AddColumn(new TableColumn("[bold green]Full Name[/]").Centered());
             customerTable.AddColumn(new TableColumn("[bold green]Email[/]").Centered());
-            customerTable.AddColumn(new TableColumn("[bold green]Phone Number[/]").Centered());;
+            customerTable.AddColumn(new TableColumn("[bold green]Phone Number[/]").Centered());
 
             return customerTable;
         }
@@ -50,7 +51,7 @@ namespace AppointmentManagementSystem.Utilities
                     new Markup($"[magenta]{customers.Phone}[/]")
                     );
 
-            };
+            }
             AnsiConsole.Write(customerTable);
         }
 
