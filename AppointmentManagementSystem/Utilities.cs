@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data.Common;
 using AppointmentManagementSystem.Data.Models;
@@ -21,17 +22,27 @@ namespace AppointmentManagementSystem.Utilities
             string promptValue = AnsiConsole.Prompt( new TextPrompt<string>($"[bold green]{promptText}:[/] "));
             return promptValue;
         }
-
-        public static Table CreateCustomerDataTable()
+        public static DateTime CliDatePrompt(string promptText)
         {
-            var customerTable = new Table();
-            customerTable.AddColumn(new TableColumn("[bold green]Full Name[/]").Centered());
-            customerTable.AddColumn(new TableColumn("[bold green]Email[/]").Centered());
-            customerTable.AddColumn(new TableColumn("[bold green]Phone Number[/]").Centered());
-
-            return customerTable;
+            DateTime promptValue = AnsiConsole.Prompt( new TextPrompt<DateTime>($"[bold green]{promptText}:[/] "));
+            return promptValue;
+        }
+        
+        public static int CliIntPrompt(string promptText)
+        {
+            int promptValue = AnsiConsole.Prompt( new TextPrompt<int>($"[bold green]{promptText}:[/] "));
+            return promptValue;
         }
 
+        public static Table CreateDataTable(string [] TableFields)
+        {
+            var customerTable = new Table();
+            foreach (string field in TableFields)
+            {
+                customerTable.AddColumn(new TableColumn($"[bold green]{field}[/]").Centered());
+            }
+            return customerTable;
+        }
         public static string CustomerFields(string customerField)
         {
             var field = AnsiConsole.Prompt(
@@ -40,10 +51,26 @@ namespace AppointmentManagementSystem.Utilities
             return field;
         }
 
-        public static void ReadCustomerData(List<Customer> customersList)
+        public static void ReadAppointmentsData(ReadOnlyCollection<Appointment> appointmentsList)
         {
-            Table customerTable = CreateCustomerDataTable();
-            foreach (Customer customers in customersList)
+            //Table appointmentTable = AppointmentCustomerDataTable();
+            Table appointmentTable = CreateDataTable(["Full Name","Service Type","Appointment Date","Appointment Notes"]);
+            foreach (Appointment appointment in appointmentsList.AsReadOnly())
+            {
+                appointmentTable.AddRow(
+                    new Markup($"[magenta]{appointment.Customer.Name}[/]"),
+                    new Markup($"[magenta]{appointment.ServiceType}[/]"),
+                    new Markup($"[magenta]{appointment.AppointmentDate}[/]"),
+                    new Markup($"[magenta]{appointment.AppointmentNotes}[/]")
+                    );
+
+            }
+            AnsiConsole.Write(appointmentTable);
+        }
+        public static void ReadCustomerData(ReadOnlyCollection<Customer> customersList)
+        {
+            Table customerTable = CreateDataTable(["Full Name","Email","Phone"]);
+            foreach (Customer customers in customersList.AsReadOnly())
             {
                 customerTable.AddRow(
                     new Markup($"[magenta]{customers.Name}[/]"),
@@ -64,7 +91,7 @@ namespace AppointmentManagementSystem.Utilities
                 {
                     isCustomerEmail = true;
                     AnsiConsole.Markup("[green bold]Customer Found[/]\n");
-                    Table customerTable = CreateCustomerDataTable();
+                    Table customerTable = CreateDataTable(["Full Name","Email","Phone"]);
                     customerTable.AddRow(new Markup($"[yellow]{customer.Name}[/]"), new Markup($"[yellow]{customer.Email}[/]"), new Markup($"[yellow]{customer.Phone}[/]"));
                     AnsiConsole.Write(customerTable);
                     return isCustomerEmail;
@@ -107,7 +134,7 @@ namespace AppointmentManagementSystem.Utilities
                         break;
                     }
                     AnsiConsole.Markup("[green bold]Updated Customer[/]\n");
-                    Table customerTable = CreateCustomerDataTable();
+                    Table customerTable = CreateDataTable(["Full Name","Email","Phone"]);
                     customerTable.AddRow(new Markup($"[bold red]{customer.Name}[/]"), new Markup($"[red]{customer.Email}[/]"), new Markup($"[red]{customer.Phone}[/]"));
                     AnsiConsole.Write(customerTable);
                     break;
@@ -128,7 +155,7 @@ namespace AppointmentManagementSystem.Utilities
                 {
                     customerFound = true;
                     AnsiConsole.Markup("[green bold]Customer Found and will be[/][red] Deleted[/]\n");
-                    Table customerTable = CreateCustomerDataTable();
+                    Table customerTable = CreateDataTable(["Full Name","Email","Phone"]);
                     customerTable.AddRow(new Markup($"[bold red]{customer.Name}[/]"), new Markup($"[red]{customer.Email}[/]"), new Markup($"[red]{customer.Phone}[/]"));
                     AnsiConsole.Write(customerTable);
                     customersList.Remove(customer);

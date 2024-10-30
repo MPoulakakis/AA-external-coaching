@@ -1,11 +1,13 @@
-﻿using AppointmentManagementSystem.Data.Models;
+﻿using System.Collections.ObjectModel;
+using System.Runtime.CompilerServices;
+using AppointmentManagementSystem.Data.Models;
 using AppointmentManagementSystem.Data.Repositories;
 using AppointmentManagementSystem.Utilities;
 using Spectre.Console;
 
 class Program
 {
-    static void Main(string[] args)
+    static async Task Main(string[] args)
     {
         // Render a table using Spectre.Console
         // var table = new Table();
@@ -15,34 +17,19 @@ class Program
         // table.AddRow("Baz", "[green]Qux[/]");
 
         // AnsiConsole.Write(table);
-        string[] actionSelector = new string[5]
-        {
-            "Create",
-            "Read",
-            "Update",
-            "Delete",
-            "Exit"
-        };
+        string[] actionSelector = ["Create", "Read", "Update", "Delete", "Return"];
 
-        string[] operationSelector = new string[3]
-        {
-            "Customer Data",
-            "Appointment Data",
-            "Exit"
-        };
+        string[] operationSelector = ["Customer Data", "Appointment Data", "Exit"];
 
-        string[] fieldUpdateSelector = new string[3]
-        {
-            "Full Name",
-            "Email",
-            "Phone"
-        };
+        string[] fieldUpdateSelector = ["Full Name", "Email", "Phone"];
+
+        string[] AppointmentUpdateSelector = ["Customer", "Service Type", "Appointment Date", "Appointment Notes"];
 
 
         List<Customer> initialCustomers = [];
-        var ex1 = new Customer(id: 1, name: "Manos Poulakakis", email: "manolispoulakakis@gmail.com", phone: "6984153487");
-        var ex2 = new Customer(id: 2, "Fenia Giannakopoulou", "feniagiannakopoulou@gmail.com", "6943254612");
-        var ex3 = new Customer(id: 3, "Kostas Poulakakis", "kospoul@gmail.com", "6982806297");
+        var ex1 = new Customer(name: "Manos Poulakakis", email: "manolispoulakakis@gmail.com", phone: "6984153487");
+        var ex2 = new Customer("Fenia Giannakopoulou", "feniagiannakopoulou@gmail.com", "6943254612");
+        var ex3 = new Customer("Kostas Poulakakis", "kospoul@gmail.com", "6982806297");
         initialCustomers.Add(ex1);
         initialCustomers.Add(ex2);
         initialCustomers.Add(ex3);
@@ -50,18 +37,22 @@ class Program
         var customerRepository = new InMemoryCustomerRepository(initialCustomers);
 
 
-        List<Appointment> appointmentsList = [];
+        List<Appointment> initialAppointment = [];
         Appointment ap1 = new Appointment(ex1, "Massage", new DateTime(2024, 11, 15, 20, 0, 0), "Deep tissue massage");
-        Appointment ap2 = new Appointment(ex2, "Massage", new DateTime(2024, 11, 15, 20, 0, 0));
-        Appointment ap3 = new Appointment(ex3, "Massage", new DateTime(2024, 11, 15, 20, 0, 0), "Full Body Training");
+        Appointment ap2 = new Appointment(ex2, "Massage", new DateTime(2024, 11, 18, 12, 0, 0));
+        Appointment ap3 = new Appointment(ex3, "Personal Training", new DateTime(2024, 11, 27, 15, 0, 0), "Full Body Training");
 
-        appointmentsList.Add(ap1);
-        appointmentsList.Add(ap2);
-        appointmentsList.Add(ap3);
+        initialAppointment.Add(ap1);
+        initialAppointment.Add(ap2);
+        initialAppointment.Add(ap3);
+
+        var appointmentRepository = new InMemoryAppointmentRepository(initialAppointment);
 
 
         string action = string.Empty;
         string operation;
+        int customerId;
+        int appointmentId;
         do
         {
 
@@ -76,40 +67,31 @@ class Program
                         switch (action)
                         {
                             case "Create":
-                                // TODO: Use customerRepository
-                                Customer customer = new Customer(id: 0, Utilities.CustomerFields("Full Name"), Utilities.CustomerFields("Email"), Utilities.CustomerFields("Phone"));
-                                initialCustomers.Add(customer);
+                                Customer customer = new(Utilities.CustomerFields("Full Name"), Utilities.CustomerFields("Email"), Utilities.CustomerFields("Phone"));
+                                await customerRepository.CreateCustomer(customer);
                                 break;
 
                             case "Read":
-                                // TODO: Use customerRepository
-                                Utilities.ReadCustomerData(initialCustomers);
+                                Utilities.ReadCustomerData(customerRepository.GetCustomers().Result);
                                 break;
 
                             case "Update":
-                                string updateEmail = Utilities.CliTextPrompt("Provide Customer Email");
-                                bool isCustomer = Utilities.CheckIfCustomerExists(updateEmail, initialCustomers);
-                                if (isCustomer)
-                                {
-                                    string updateField = Utilities.Selector(fieldUpdateSelector, "Provide Customer Field That Needs To Be Upated");
-                                    string updateValue = Utilities.CliTextPrompt($"Provide Updated {updateField}");
-                                    // TODO: Use customerRepository
-                                    Utilities.UpdateCustomer(updateEmail, initialCustomers, updateField, updateValue);
-                                }
+                                customerId = Utilities.CliIntPrompt("Provide Customer Id");
+                                string updateField = Utilities.Selector(fieldUpdateSelector, "Provide Customer Field That Needs To Be Upated");
+                                string updateValue = Utilities.CliTextPrompt($"Provide Updated {updateField}");
+                                await customerRepository.UpdateCustomer(customerId, updateField, updateValue);
                                 break;
 
                             case "Delete":
-                                string deleteEmail = Utilities.CliTextPrompt("Provide Customer Email");
-                                // isCustomer = Utilities.CheckIfCustomerExists(deleteEmail, customersList);
-                                // TODO: Use customerRepository
-                                Utilities.DeleteCustomer(deleteEmail, initialCustomers);
+                                customerId = Utilities.CliIntPrompt("Provide Customer Id");
+                                await customerRepository.DeleteCustomer(customerId);
                                 break;
 
                             default:
                                 AnsiConsole.Markup($"[bold red]Returning To Start Menu[/]\n");
                                 break;
                         }
-                    } while (action != "Exit");
+                    } while (action != "Return");
                     break;
 
                 case "Appointment Data":
@@ -121,17 +103,67 @@ class Program
                         switch (action)
                         {
                             case "Create":
+                                customerId = Utilities.CliIntPrompt("Provide Customer Id");
+                                var customer = await customerRepository.CustomerExists(customerId);
+                                if (customer is not null)
+                                {
+                                    var serviceType = Utilities.Selector(["Personal Training", "Massage"], "[bold green]Provide Service Type:[/]");
+                                    var appointmentDate = AnsiConsole.Prompt(
+                                        new TextPrompt<DateTime>($"[bold green]Provide Date-Time [/][red][[MM-DD-YYYY HH:MM]]:[/] "));
+
+
+                                    var appointmentNotes = AnsiConsole.Prompt(
+                                        new TextPrompt<string>($"[red][[Optional]][/][bold green]Provide Appointment Notes:[/] ")
+                                        .AllowEmpty());
+                                    
+                                    Appointment appointment = new(customer,serviceType, appointmentDate, appointmentNotes);
+                                    await appointmentRepository.CreateAppointment(appointment, customerId);
+                                }
+                                else
+                                {
+                                    AnsiConsole.Markup($"[bold red]Customer not Found[/]\n");
+                                }
                                 break;
                             case "Read":
+                                Utilities.ReadAppointmentsData(appointmentRepository.GetAppointments().Result);
                                 break;
                             case "Update":
+                                string? updateValue = null ;              // string updateValue;
+                                DateTime? updateDate = null ;             // DateTime updateDate;
+                                Customer? appointmentCustomer = null;     // Customer appointmentCustomer;
+                                appointmentId = Utilities.CliIntPrompt("Provide Appointment Id");
+                                string updateField = Utilities.Selector(AppointmentUpdateSelector, "Provide Appointment Field That Needs To Be Upated");
+                                switch (updateField) {
+                                    case "Appointment Date":
+                                        updateDate = Utilities.CliDatePrompt("Provide Updated Date [red][[MM-DD-YYYY HH:MM]][/]");
+                                        // await appointmentRepository.UpdateAppointment(customerId, updateField,updateDateValue: updateDate);
+                                        break;
+                                    case "Customer":
+                                        customerId = Utilities.CliIntPrompt("Provide Updated Customer Id");
+                                        appointmentCustomer = await customerRepository.CustomerExists(customerId);
+                                        // await appointmentRepository.UpdateAppointment(customerId, updateField,customer: appointmentCustomer);
+                                        break;
+                                    case "Service Type":
+                                        updateValue = Utilities.Selector(["Personal Training", "Massage"], "[bold green]Provide Service Type:[/]");
+                                        break;
+                                    default:
+                                        updateValue = Utilities.CliTextPrompt($"Provide Updated {updateField}");
+                                        // await appointmentRepository.UpdateAppointment(customerId, updateField,updateValue: updateValue);
+                                        break;
+                                }
+                                await appointmentRepository.UpdateAppointment(appointmentId, updateField, updateValue, updateDate,appointmentCustomer);
                                 break;
                             case "Delete":
+                                appointmentId = Utilities.CliIntPrompt("Provide Appointment Id");
+                                await appointmentRepository.DeleteAppointment(appointmentId);
+                                break;
+                            default:
+                                AnsiConsole.Markup($"[bold red]Returning To Start Menu[/]\n");
                                 break;
 
                         }
 
-                    } while (action != "Exit");
+                    } while (action != "Return");
 
                     break;
                 default:

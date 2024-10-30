@@ -7,6 +7,7 @@ public interface ICustomerRepository
 {
     Task<ReadOnlyCollection<Customer>> GetCustomers();
     Task CreateCustomer(Customer customer);
-    Task UpdateCustomer(Customer customer);
+    Task UpdateCustomer(int id, string updateField, string updateValue);
     Task DeleteCustomer(int id);
+    Task<Customer> CustomerExists(int id);
 }

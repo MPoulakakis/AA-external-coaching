@@ -1,5 +1,6 @@
 ﻿using AppointmentManagementSystem.Data.Abstractions;
 using AppointmentManagementSystem.Data.Models;
+using System.Collections;
 using System.Collections.ObjectModel;
 
 namespace AppointmentManagementSystem.Data.Repositories;
@@ -28,17 +29,43 @@ public class InMemoryCustomerRepository(List<Customer>? initialData = null) : IC
 
     public Task<ReadOnlyCollection<Customer>> GetCustomers() => Task.FromResult(_customers.AsReadOnly());
 
-    public Task UpdateCustomer(Customer customer)
+    public Task UpdateCustomer(int id, string updateField, string updateValue)
     {
-        var foundCustomer = _customers.Find(x => x.Id == customer.Id);
+        var foundCustomer = _customers.Find(x => x.Id == id);
 
         if (foundCustomer is not null)
         {
-            foundCustomer.Email = customer.Email;
-            foundCustomer.Name = customer.Name;
-            foundCustomer.Phone = customer.Phone;
+            switch(updateField)
+            {
+                case "Full Name":
+                    foundCustomer.Name = updateValue;        
+                    break;
+
+                case "Email":
+                    foundCustomer.Email = updateValue;        
+                    break;
+
+                case "Phone":
+                    foundCustomer.Phone = updateValue;        
+                    break;
+            }
         }
 
         return Task.CompletedTask;
+    }
+
+    public Task<Customer> CustomerExists(int id)
+    {
+        var foundCustomer = _customers.Find(x => x.Id == id);
+
+        if (foundCustomer is not null)
+        {
+            return Task.FromResult(foundCustomer);
+        }
+        else
+        {
+            return Task.FromResult<Customer>(null);
+        }
+
     }
 }
