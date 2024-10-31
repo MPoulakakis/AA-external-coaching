@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data.Common;
+using System.Text.RegularExpressions;
 using AppointmentManagementSystem.Data.Models;
 using Spectre.Console;
 namespace AppointmentManagementSystem.Utilities
@@ -51,10 +52,43 @@ namespace AppointmentManagementSystem.Utilities
 
         public static string CustomerFields(string customerField)
         {
-            var field = AnsiConsole.Prompt(
-                new TextPrompt<string>($"[bold green]Provide Customer {customerField}:[/] "));
-
-            return field;
+            string field;
+            switch (customerField) 
+            {
+                case "Email":
+                    var emailPattern = @"^[^@\s]+@(gmail|hotmail|yahoo)\.(com|gr)$";
+                    field = AnsiConsole.Prompt(
+                        new TextPrompt<string>($"[bold green]Provide Customer {customerField}:[/] ")
+                        .Validate(input =>
+                        {
+                            if (!Regex.IsMatch(input,emailPattern))
+                            {
+                                return ValidationResult.Error("[red]Email should contain @,.com,.gr, and a mailing organization[/]");
+                            }
+                            return ValidationResult.Success();
+                        }
+                        ));
+                    return field;
+                case "Phone":
+                    field = AnsiConsole.Prompt(
+                        new TextPrompt<string>($"[bold green]Provide Customer {customerField}:[/] ")
+                        .Validate(input => 
+                        {
+                            if ((input.Length != 10) || (!input.All(char.IsDigit)))
+                                return ValidationResult.Error("[red]Phone Number should contain 10 Digits[/]");
+                            
+                            if (! input.StartsWith("69"))
+                                return ValidationResult.Error("[red]Phone Number should start with 69[/]");
+                            
+                            return ValidationResult.Success();
+                        }
+                        ));
+                    return field;
+                default:
+                    field = AnsiConsole.Prompt(
+                        new TextPrompt<string>($"[bold green]Provide Customer {customerField}:[/] "));
+                    return field;
+            }
         }
 
 
@@ -92,97 +126,6 @@ namespace AppointmentManagementSystem.Utilities
             }
             AnsiConsole.Write(customerTable);
         }
-
-
-        public static bool CheckIfCustomerExists(string customerEmail, List<Customer> customersList)
-        {
-            bool isCustomerEmail = false;   
-            foreach (Customer customer in customersList)
-            {
-                if (customerEmail == customer.Email)
-                {
-                    isCustomerEmail = true;
-                    AnsiConsole.Markup("[green bold]Customer Found[/]\n");
-                    Table customerTable = CreateDataTable(["Full Name","Email","Phone"]);
-                    customerTable.AddRow(new Markup($"[yellow]{customer.Name}[/]"), new Markup($"[yellow]{customer.Email}[/]"), new Markup($"[yellow]{customer.Phone}[/]"));
-                    AnsiConsole.Write(customerTable);
-                    return isCustomerEmail;
-                }
-            }
-            if (! isCustomerEmail)
-            {
-                AnsiConsole.Markup("[red bold]Customer not Found[/]\n");
-                return isCustomerEmail;
-            }
-            else
-            {
-                return isCustomerEmail;
-            }
-
-        }
-
-
-        public static void UpdateCustomer(string customerEmail, List<Customer> customersList, string updateField, string updateValue)
-        {
-            bool customerFound = false;
-            foreach (Customer customer in customersList)
-            {
-                if (customerEmail == customer.Email)
-                {
-                    customerFound = true ;
-                    AnsiConsole.Markup("[green bold]Customer Found and will be[/] [red]Updated[/]\n");
-
-                    switch(updateField)
-                    {
-                        case "Full Name":
-                            customer.Name = updateValue;
-                        break;
-
-                        case "Email":
-                            customer.Email = updateValue;
-                        break;
-
-                        case "Phone":
-                            customer.Phone = updateValue;
-                        break;
-                    }
-                    AnsiConsole.Markup("[green bold]Updated Customer[/]\n");
-                    Table customerTable = CreateDataTable(["Full Name","Email","Phone"]);
-                    customerTable.AddRow(new Markup($"[bold red]{customer.Name}[/]"), new Markup($"[red]{customer.Email}[/]"), new Markup($"[red]{customer.Phone}[/]"));
-                    AnsiConsole.Write(customerTable);
-                    break;
-                }
-            }
-            if (! customerFound)
-            {
-                AnsiConsole.Markup("[red bold]Customer not Found[/]\n");
-            }   
-        }
-
-
-        public static void DeleteCustomer(string customerEmail, List<Customer> customersList)
-        {
-            bool customerFound = false;
-            foreach (Customer customer in customersList)
-            {
-                if (customerEmail == customer.Email)
-                {
-                    customerFound = true;
-                    AnsiConsole.Markup("[green bold]Customer Found and will be[/][red] Deleted[/]\n");
-                    Table customerTable = CreateDataTable(["Full Name","Email","Phone"]);
-                    customerTable.AddRow(new Markup($"[bold red]{customer.Name}[/]"), new Markup($"[red]{customer.Email}[/]"), new Markup($"[red]{customer.Phone}[/]"));
-                    AnsiConsole.Write(customerTable);
-                    customersList.Remove(customer);
-                    break;
-                }
-            }
-            if (! customerFound)
-            {
-                AnsiConsole.Markup("[red bold]Customer not Found[/]\n");
-            }
-
-        }
-    
     }
 
 }
