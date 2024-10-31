@@ -11,8 +11,7 @@ namespace AppointmentManagementSystem.Data.Repositories
 
         public Task CreateAppointment(Appointment appointment, int id)
         {
-            var foundCustomer = _appointments.Find(appointment => appointment.Customer.Id == id);
-            if (foundCustomer != null)
+            if (appointment is not null)
             {
                 _appointments.Add(appointment);
             }

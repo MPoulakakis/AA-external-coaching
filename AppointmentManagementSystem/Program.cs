@@ -96,7 +96,6 @@ class Program
 
                 case "Appointment Data":
                     AnsiConsole.Markup($"[bold green]You Selected [red]{operation}[/][/]\n");
-
                     do
                     {
                         action = Utilities.Selector(actionSelector, "Please Select Action to be executed or Exit to close the application");
@@ -108,9 +107,9 @@ class Program
                                 if (customer is not null)
                                 {
                                     var serviceType = Utilities.Selector(["Personal Training", "Massage"], "[bold green]Provide Service Type:[/]");
+                                    
                                     var appointmentDate = AnsiConsole.Prompt(
                                         new TextPrompt<DateTime>($"[bold green]Provide Date-Time [/][red][[MM-DD-YYYY HH:MM]]:[/] "));
-
 
                                     var appointmentNotes = AnsiConsole.Prompt(
                                         new TextPrompt<string>($"[red][[Optional]][/][bold green]Provide Appointment Notes:[/] ")
