@@ -17,11 +17,14 @@ namespace AppointmentManagementSystem.Utilities
         return actionSelection;
         }
 
+
         public static string CliTextPrompt(string promptText)
         {
             string promptValue = AnsiConsole.Prompt( new TextPrompt<string>($"[bold green]{promptText}:[/] "));
             return promptValue;
         }
+
+
         public static DateTime CliDatePrompt(string promptText)
         {
             DateTime promptValue = AnsiConsole.Prompt( new TextPrompt<DateTime>($"[bold green]{promptText}:[/] "));
@@ -34,6 +37,7 @@ namespace AppointmentManagementSystem.Utilities
             return promptValue;
         }
 
+
         public static Table CreateDataTable(string [] TableFields)
         {
             var customerTable = new Table();
@@ -43,6 +47,8 @@ namespace AppointmentManagementSystem.Utilities
             }
             return customerTable;
         }
+
+
         public static string CustomerFields(string customerField)
         {
             var field = AnsiConsole.Prompt(
@@ -51,13 +57,15 @@ namespace AppointmentManagementSystem.Utilities
             return field;
         }
 
+
         public static void ReadAppointmentsData(ReadOnlyCollection<Appointment> appointmentsList)
         {
             //Table appointmentTable = AppointmentCustomerDataTable();
-            Table appointmentTable = CreateDataTable(["Full Name","Service Type","Appointment Date","Appointment Notes"]);
+            Table appointmentTable = CreateDataTable(["Id","Full Name","Service Type","Appointment Date","Appointment Notes"]);
             foreach (Appointment appointment in appointmentsList.AsReadOnly())
             {
                 appointmentTable.AddRow(
+                    new Markup($"[magenta]{appointment.Id}[/]"),
                     new Markup($"[magenta]{appointment.Customer.Name}[/]"),
                     new Markup($"[magenta]{appointment.ServiceType}[/]"),
                     new Markup($"[magenta]{appointment.AppointmentDate}[/]"),
@@ -67,12 +75,15 @@ namespace AppointmentManagementSystem.Utilities
             }
             AnsiConsole.Write(appointmentTable);
         }
+
+
         public static void ReadCustomerData(ReadOnlyCollection<Customer> customersList)
         {
-            Table customerTable = CreateDataTable(["Full Name","Email","Phone"]);
+            Table customerTable = CreateDataTable(["Id","Full Name","Email","Phone"]);
             foreach (Customer customers in customersList.AsReadOnly())
             {
                 customerTable.AddRow(
+                    new Markup($"[magenta]{customers.Id}[/]"),
                     new Markup($"[magenta]{customers.Name}[/]"),
                     new Markup($"[magenta]{customers.Email}[/]"),
                     new Markup($"[magenta]{customers.Phone}[/]")
@@ -81,6 +92,7 @@ namespace AppointmentManagementSystem.Utilities
             }
             AnsiConsole.Write(customerTable);
         }
+
 
         public static bool CheckIfCustomerExists(string customerEmail, List<Customer> customersList)
         {
@@ -108,6 +120,7 @@ namespace AppointmentManagementSystem.Utilities
             }
 
         }
+
 
         public static void UpdateCustomer(string customerEmail, List<Customer> customersList, string updateField, string updateValue)
         {
@@ -145,6 +158,7 @@ namespace AppointmentManagementSystem.Utilities
                 AnsiConsole.Markup("[red bold]Customer not Found[/]\n");
             }   
         }
+
 
         public static void DeleteCustomer(string customerEmail, List<Customer> customersList)
         {

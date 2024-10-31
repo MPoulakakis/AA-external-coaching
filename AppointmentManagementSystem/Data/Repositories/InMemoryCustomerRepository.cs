@@ -66,6 +66,5 @@ public class InMemoryCustomerRepository(List<Customer>? initialData = null) : IC
         {
             return Task.FromResult<Customer>(null);
         }
-
     }
 }
