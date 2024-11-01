@@ -18,7 +18,7 @@ namespace AppointmentManagementSystem.Utilities
         return actionSelection;
         }
 
-
+    // TODO: For all Cli Prompt Functions unify in class?
         public static string CliTextPrompt(string promptText)
         {
             string promptValue = AnsiConsole.Prompt( new TextPrompt<string>($"[bold green]{promptText}:[/] "));
@@ -95,15 +95,16 @@ namespace AppointmentManagementSystem.Utilities
         public static void ReadAppointmentsData(ReadOnlyCollection<Appointment> appointmentsList)
         {
             //Table appointmentTable = AppointmentCustomerDataTable();
+            string color = "blue";
             Table appointmentTable = CreateDataTable(["Id","Full Name","Service Type","Appointment Date","Appointment Notes"]);
             foreach (Appointment appointment in appointmentsList.AsReadOnly())
             {
                 appointmentTable.AddRow(
-                    new Markup($"[magenta]{appointment.Id}[/]"),
-                    new Markup($"[magenta]{appointment.Customer.Name}[/]"),
-                    new Markup($"[magenta]{appointment.ServiceType}[/]"),
-                    new Markup($"[magenta]{appointment.AppointmentDate}[/]"),
-                    new Markup($"[magenta]{appointment.AppointmentNotes}[/]")
+                    new Markup($"[{color}]{appointment.Id}[/]"),
+                    new Markup($"[{color}]{appointment.Customer.Name}[/]"),
+                    new Markup($"[{color}]{appointment.ServiceType}[/]"),
+                    new Markup($"[{color}]{appointment.AppointmentDate}[/]"),
+                    new Markup($"[{color}]{appointment.AppointmentNotes}[/]")
                     );
 
             }
@@ -113,14 +114,15 @@ namespace AppointmentManagementSystem.Utilities
 
         public static void ReadCustomerData(ReadOnlyCollection<Customer> customersList)
         {
+            string color = "blue";
             Table customerTable = CreateDataTable(["Id","Full Name","Email","Phone"]);
             foreach (Customer customers in customersList.AsReadOnly())
             {
                 customerTable.AddRow(
-                    new Markup($"[magenta]{customers.Id}[/]"),
-                    new Markup($"[magenta]{customers.Name}[/]"),
-                    new Markup($"[magenta]{customers.Email}[/]"),
-                    new Markup($"[magenta]{customers.Phone}[/]")
+                    new Markup($"[{color}]{customers.Id}[/]"),
+                    new Markup($"[{color}]{customers.Name}[/]"),
+                    new Markup($"[{color}]{customers.Email}[/]"),
+                    new Markup($"[{color}]{customers.Phone}[/]")
                     );
 
             }
