@@ -5,7 +5,7 @@ using Spectre.Console;
 
 namespace AppointmentManagementSystem.Data.Repositories
 {
-    public class InMemoryAppointmentRepository(List<Appointment>? initialData = null) : IAppointmentManagementSystem
+    public class InMemoryAppointmentRepository(List<Appointment>? initialData = null) : IAppointmentRepository
     {
          private readonly List<Appointment> _appointments = initialData ?? [];
 
@@ -37,11 +37,11 @@ namespace AppointmentManagementSystem.Data.Repositories
 
         public Task UpdateAppointment(int id, string updateField, string? updateValue = null, DateTime? updateDateValue = null, Customer? customer = null)
         {
-            
             var foundAppointment = _appointments.Find(x => x.Id == id);
             if (foundAppointment is not null)
             {
-                switch (updateField) {
+                switch (updateField) 
+                {
                     case "Customer":
                         foundAppointment.Customer = customer;
                         break;
@@ -53,7 +53,7 @@ namespace AppointmentManagementSystem.Data.Repositories
                         break;
                     case "Appointment Notes":
                         foundAppointment.AppointmentNotes = updateValue;
-                        break;;
+                        break;
                 }
             }
             else

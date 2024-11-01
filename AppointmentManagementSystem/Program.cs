@@ -1,22 +1,17 @@
 ﻿using System.Collections.ObjectModel;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography.X509Certificates;
+using AppointmentManagementSystem.Data.Abstractions;
 using AppointmentManagementSystem.Data.Models;
 using AppointmentManagementSystem.Data.Repositories;
 using AppointmentManagementSystem.Utilities;
+using Microsoft.Extensions.DependencyInjection;
 using Spectre.Console;
 
 class Program
 {
     static async Task Main(string[] args)
     {
-        // Render a table using Spectre.Console
-        // var table = new Table();
-        // table.AddColumn("Foo");
-        // table.AddColumn("Bar");
-
-        // table.AddRow("Baz", "[green]Qux[/]");
-
-        // AnsiConsole.Write(table);
         string[] actionSelector = ["Create", "Read", "Update", "Delete", "Return"];
 
         string[] operationSelector = ["Customer Data", "Appointment Data", "Exit"];
@@ -25,6 +20,8 @@ class Program
 
         string[] AppointmentUpdateSelector = ["Customer", "Service Type", "Appointment Date", "Appointment Notes"];
 
+
+        var services = new ServiceCollection();
 
         List<Customer> initialCustomers = [];
         var ex1 = new Customer(name: "Manos Poulakakis", email: "manolispoulakakis@gmail.com", phone: "6984153487");
@@ -45,8 +42,10 @@ class Program
         initialAppointment.Add(ap1);
         initialAppointment.Add(ap2);
         initialAppointment.Add(ap3);
-
-        var appointmentRepository = new InMemoryAppointmentRepository(initialAppointment);
+        
+        services.AddSingleton<IAppointmentRepository>(x => new InMemoryAppointmentRepository(initialAppointment));
+        var serviceProvider = services.BuildServiceProvider();
+        var appointmentRepository = serviceProvider.GetService<IAppointmentRepository>();
 
 
         string action = string.Empty;
@@ -102,10 +101,12 @@ class Program
                         switch (action)
                         {
                             case "Create":
+                                
                                 customerId = Utilities.CliIntPrompt("Provide Customer Id");
                                 var customer = await customerRepository.CustomerExists(customerId);
                                 if (customer is not null)
                                 {
+                                    // TODO: Move the following to Utilities, and add validation logic
                                     var serviceType = Utilities.Selector(["Personal Training", "Massage"], "[bold green]Provide Service Type:[/]");
                                     
                                     var appointmentDate = AnsiConsole.Prompt(
@@ -114,7 +115,7 @@ class Program
                                     var appointmentNotes = AnsiConsole.Prompt(
                                         new TextPrompt<string>($"[red][[Optional]][/][bold green]Provide Appointment Notes:[/] ")
                                         .AllowEmpty());
-                                    
+                                    // TODO: This will remain here and receive data from Utilities
                                     Appointment appointment = new(customer,serviceType, appointmentDate, appointmentNotes);
                                     await appointmentRepository.CreateAppointment(appointment, customerId);
                                 }
@@ -127,6 +128,7 @@ class Program
                                 Utilities.ReadAppointmentsData(appointmentRepository.GetAppointments().Result);
                                 break;
                             case "Update":
+                                // TODO: Move the following to Utilities, and add validation logic
                                 string? updateValue = null ;              // string updateValue;
                                 DateTime? updateDate = null ;             // DateTime updateDate;
                                 Customer? appointmentCustomer = null;     // Customer appointmentCustomer;
@@ -150,6 +152,7 @@ class Program
                                         // await appointmentRepository.UpdateAppointment(customerId, updateField,updateValue: updateValue);
                                         break;
                                 }
+                                // TODO This will remain here and receive data from Utilities
                                 await appointmentRepository.UpdateAppointment(appointmentId, updateField, updateValue, updateDate,appointmentCustomer);
                                 break;
                             case "Delete":
@@ -171,23 +174,4 @@ class Program
             }
         } while (operation != "Exit");
     }
-
-    // Add parameters on the method to use it for every selection prompt
-    // parameters should be the < title , list of choices> 
-    // this can be use for both operations and actions
-
-    // static string createCustomer()
-    // {
-    //     string name = AnsiConsole.Prompt(
-    //         new TextPrompt<string>($"Provide Customer Name"));
-    //     string email = AnsiConsole.Prompt(
-    //         new TextPrompt<string>($"Provide Customer Email"));
-    //     string phone = AnsiConsole.Prompt(
-    //         new TextPrompt<string>($"Provide Customer Phone Number"));
-
-    // }
-
-    // Pass an array to method as parameter to be used for choices ( use array due to standard size )
-    // By doing so we can use the actionSelector for all selection prompt cases
-    // declare array like , string[] actionSelector
 }

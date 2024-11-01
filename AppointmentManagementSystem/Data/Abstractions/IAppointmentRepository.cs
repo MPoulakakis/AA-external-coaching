@@ -3,7 +3,7 @@ using AppointmentManagementSystem.Data.Models;
 
 namespace AppointmentManagementSystem.Data.Abstractions;
 
-public interface IAppointmentManagementSystem
+public interface IAppointmentRepository
 {
     Task<ReadOnlyCollection<Appointment>> GetAppointments();
     Task CreateAppointment(Appointment appointment, int id);
