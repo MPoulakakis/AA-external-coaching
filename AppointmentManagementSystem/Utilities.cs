@@ -1,9 +1,8 @@
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Data.Common;
 using System.Text.RegularExpressions;
 using AppointmentManagementSystem.Data.Models;
 using Spectre.Console;
+
 namespace AppointmentManagementSystem.Utilities
 {
     class Utilities
@@ -12,16 +11,31 @@ namespace AppointmentManagementSystem.Utilities
         {
             string actionSelection = AnsiConsole.Prompt(
             new SelectionPrompt<string>()
-            .Title("[bold green][/]\n")
+            .Title($"[bold green]{Title}[/]\n")
             .PageSize(5)
             .AddChoices(Selector));
         return actionSelection;
         }
+        public static TimeSpan DurationSelector(TimeSpan[] TrainingDuration, string Title) 
+        {
+            TimeSpan trainingDuration = AnsiConsole.Prompt(
+            new SelectionPrompt<TimeSpan>()
+            .Title($"[bold green]{Title}[/]\n")
+            .PageSize(5)
+            .AddChoices(TrainingDuration));
+        return trainingDuration;
+        }
 
     // TODO: For all Cli Prompt Functions unify in class?
-        public static string CliTextPrompt(string promptText)
+        public static string CliTextPrompt(string promptText,bool isOptional = false)
         {
-            string promptValue = AnsiConsole.Prompt( new TextPrompt<string>($"[bold green]{promptText}:[/] "));
+            string promptValue;
+            if (isOptional)
+                promptValue = AnsiConsole.Prompt( new TextPrompt<string>($"[red][[Optional]][/][bold green]{promptText}:[/] ")
+                .AllowEmpty()
+                );
+            else
+                promptValue = AnsiConsole.Prompt( new TextPrompt<string>($"[bold green]{promptText}:[/] "));
             return promptValue;
         }
 
@@ -31,6 +45,17 @@ namespace AppointmentManagementSystem.Utilities
             DateTime promptValue = AnsiConsole.Prompt( new TextPrompt<DateTime>($"[bold green]{promptText}:[/] "));
             return promptValue;
         }
+        public static TimeSpan CliTimePrompt(string promptText)
+        {
+            TimeSpan trainingDuration = AnsiConsole.Prompt(new TextPrompt<TimeSpan>("Duration Time")
+            .AddChoice(new TimeSpan(0,30,0))
+            .AddChoice(new TimeSpan(1,0,0))
+            .AddChoice(new TimeSpan(1,30,0))
+            );
+            return trainingDuration;
+        }
+
+
         
         public static int CliIntPrompt(string promptText)
         {
@@ -47,6 +72,13 @@ namespace AppointmentManagementSystem.Utilities
                 customerTable.AddColumn(new TableColumn($"[bold green]{field}[/]").Centered());
             }
             return customerTable;
+        }
+
+        
+        public static void CliWriteToUser(string messageUser,bool isErrorMessage)
+        {
+            string color = isErrorMessage ? "red" : "blue";
+            AnsiConsole.Markup($"[{color}]{messageUser}[/]\n");
         }
 
 
