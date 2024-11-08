@@ -2,7 +2,7 @@ using System.Reflection;
 using AppointmentManagementSystem.Data.Models;
 using AppointmentManagementSystem.Data.Repositories;
 
-namespace AppointmentManagementSystem.Tests;
+namespace AppointmentManagementSystem.Repository.Tests;
 
 public class CustomerRepositoryTests
 {
@@ -18,7 +18,7 @@ public CustomerRepositoryTests()
     }
     
     [Fact]
-    public async void ReadCustomerRepositoryData()
+    public async void ReadCustomerFromRepositoryData()
     {
         // Arrange
         Customer customer1 = new(name: "Manos Poulakakis",email:"manolispoulakakis@gmaiil.com",phone:"6984153487");
@@ -38,7 +38,7 @@ public CustomerRepositoryTests()
     }
 
     [Fact]
-    public async Task AddCustomerToRepository()
+    public async Task CreateCustomer_And_AddToRepository()
     {
         // Arrange
         Customer customer1 = new(name: "Manos Poulakakis",email:"manolispoulakakis@gmaiil.com",phone:"6984153487");
@@ -58,35 +58,64 @@ public CustomerRepositoryTests()
     }
 
     [Fact]
-    public async Task CheckIfCustomerExists()
+    public async Task CheckIfCustomerExists_OrNot()
     {
         // Arrange
         Customer customer1 = new(name: "Manos Poulakakis",email:"manolispoulakakis@gmaiil.com",phone:"6984153487");
         Customer customer2 = new(name: "Gtsap",email:"gtsap@gmaiil.com",phone:"2106523398");
-        
-        List<Customer> customers = [customer1];
-        var customerRepository = new InMemoryCustomerRepository(customers);
+        var customerRepository = new InMemoryCustomerRepository([customer1,customer2]);
         //Act
         Customer customer = await customerRepository.CustomerExists(1);
+        Customer customer3 = await customerRepository.CustomerExists(3);
         //Assert
         Assert.NotNull(customer);
         Assert.Equal(customer, customer1);
         Assert.NotEqual(customer, customer2);
+        Assert.Null(customer3);
+    }
 
-    }
-    
     [Fact]
-        public async Task CheckIfCustomerDoesnotExists()
+    public async Task DeleteCustomerFromRepository()
     {
-        // Arrange
         Customer customer1 = new(name: "Manos Poulakakis",email:"manolispoulakakis@gmaiil.com",phone:"6984153487");
-        Customer customer2 = new(name: "Gtsap",email:"gtsap@gmaiil.com",phone:"2106523398");
-        
-        List<Customer> customers = [customer1];
-        var customerRepository = new InMemoryCustomerRepository(customers);
-        //Act
-        Customer customer = await customerRepository.CustomerExists(3);
-        //Assert
-        Assert.Null(customer);
+        var customerRepository = new InMemoryCustomerRepository([customer1]);
+        await customerRepository.DeleteCustomer(1);
+        var customersRepositoryData = customerRepository.GetCustomers().Result;        
+        bool customerExists = false;
+
+        foreach (var customer in customersRepositoryData)
+        {
+            if (customer.Id == 1)
+                customerExists = true;
+        }
+
+        Assert.False(customerExists);
     }
+
+    [Fact]
+    public async Task UpdateCustomerInfoFromRepository()
+    {
+        Customer customer1 = new(name: "Manos Poulakakis",email:"manolispoulakakis@gmaiil.com",phone:"6984153487");
+        var customerRepository = new InMemoryCustomerRepository([customer1]);
+        await customerRepository.UpdateCustomer(1,"Email","nkorompos@gmail.com");
+        await customerRepository.UpdateCustomer(1,"Full Name","Nikos Korompos");
+        await customerRepository.UpdateCustomer(1,"Phone","6945348712");
+        var customersRepositoryData = customerRepository.GetCustomers().Result;
+        
+        string email = customer1.Email;
+        string name = customer1.Name;
+        string phone = customer1.Phone;
+        
+        foreach (var customer in customersRepositoryData)
+        {
+            email = customer.Email;
+            name = customer.Name;
+            phone = customer.Phone;
+        }
+
+        Assert.Equal("nkorompos@gmail.com",email);
+        Assert.Equal("Nikos Korompos",name);
+        Assert.Equal("6945348712",phone);
+    }
+
 }
