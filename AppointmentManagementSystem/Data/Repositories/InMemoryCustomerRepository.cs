@@ -36,11 +36,7 @@ public class InMemoryCustomerRepository(List<Customer>? initialData = null) : IC
         if (foundCustomer is not null)
         {
             switch(updateField)
-            {
-                case "Full Name":
-                    foundCustomer.Name = updateValue;        
-                    break;
-
+            {       
                 case "Email":
                     foundCustomer.Email = updateValue;        
                     break;

@@ -9,7 +9,7 @@ namespace AppointmentManagementSystem.Data.Repositories
     {
          private readonly List<Appointment> _appointments = initialData ?? [];
 
-        public Task CreateAppointment(Appointment appointment, int id)
+        public Task CreateAppointment(Appointment appointment)
         {
             if (appointment is not null)
             {
@@ -18,26 +18,20 @@ namespace AppointmentManagementSystem.Data.Repositories
             return Task.CompletedTask;
         }
 
-        public Task DeleteAppointment(int id)
+        public Task<bool> DeleteAppointment(int id)
         {
+            bool isDeleted = false;
             var foundAppointment = _appointments.Find(x => x.Id == id);
-            
-            if (foundAppointment is not null)
-            {
-                _appointments.Remove(foundAppointment);
-            }
-            else
-            {
-                AnsiConsole.Markup("[red]Appointment not Found[/]\n");
-            }
-            return Task.CompletedTask;
+            isDeleted = foundAppointment is not null && _appointments.Remove(foundAppointment);
+            return Task.FromResult(isDeleted);
         }
 
         public Task<ReadOnlyCollection<Appointment>> GetAppointments() => Task.FromResult(_appointments.AsReadOnly());
 
-        public Task UpdateAppointment(int id, string updateField, string? updateValue = null, DateTime? updateDateValue = null, Customer? customer = null)
+        public Task<bool> UpdateAppointment(int id, string updateField, string? updateValue = null, DateTime? updateDateValue = null, Customer? customer = null)
         {
             var foundAppointment = _appointments.Find(x => x.Id == id);
+            bool isUpdated = false;
             if (foundAppointment is not null)
             {
                 switch (updateField) 
@@ -55,12 +49,17 @@ namespace AppointmentManagementSystem.Data.Repositories
                         foundAppointment.AppointmentNotes = updateValue;
                         break;
                 }
+                isUpdated = true;
+                return Task.FromResult(isUpdated);
             }
-            else
-            {
-                AnsiConsole.Markup("[red]Appointment not Found[/]\n");
-            }
-            return Task.CompletedTask;
+            return Task.FromResult(isUpdated);
+        }
+
+        public Task<bool> AppointmentExists(int id)
+        {
+            var foundAppointment = _appointments.Find(x => x.Id == id);
+            bool appointmentExists = foundAppointment is not null;
+            return Task.FromResult(appointmentExists);
         }
     }
 }
