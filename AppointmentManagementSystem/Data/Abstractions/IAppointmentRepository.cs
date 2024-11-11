@@ -7,7 +7,7 @@ public interface IAppointmentRepository
 {
     Task<ReadOnlyCollection<Appointment>> GetAppointments();
     Task CreateAppointment(Appointment appointment);
-    Task<bool> UpdateAppointment(int id, string updateField, string? updateValue,DateTime? updateDateValue, Customer? customer);
+    Task UpdateAppointment(Appointment appointment);
     Task<bool> DeleteAppointment(int id);
-    Task<bool> AppointmentExists(int id);
+    Task<Appointment> AppointmentExists(int id);
 }

@@ -1,5 +1,6 @@
 ﻿using AppointmentManagementSystem.Data.Abstractions;
 using AppointmentManagementSystem.Data.Models;
+using Spectre.Console;
 using System.Collections;
 using System.Collections.ObjectModel;
 
@@ -29,22 +30,14 @@ public class InMemoryCustomerRepository(List<Customer>? initialData = null) : IC
 
     public Task<ReadOnlyCollection<Customer>> GetCustomers() => Task.FromResult(_customers.AsReadOnly());
 
-    public Task UpdateCustomer(int id, string updateField, string updateValue)
+    public Task UpdateCustomer(Customer customer)
     {
-        var foundCustomer = _customers.Find(x => x.Id == id);
+        var foundCustomer = _customers.Find(x => x.Id == customer.Id);
 
         if (foundCustomer is not null)
         {
-            switch(updateField)
-            {       
-                case "Email":
-                    foundCustomer.Email = updateValue;        
-                    break;
-
-                case "Phone":
-                    foundCustomer.Phone = updateValue;        
-                    break;
-            }
+            foundCustomer.Email = customer.Email;
+            foundCustomer.Phone = customer.Phone;
         }
 
         return Task.CompletedTask;
@@ -55,12 +48,8 @@ public class InMemoryCustomerRepository(List<Customer>? initialData = null) : IC
         var foundCustomer = _customers.Find(x => x.Id == id);
 
         if (foundCustomer is not null)
-        {
             return Task.FromResult(foundCustomer);
-        }
         else
-        {
             return Task.FromResult<Customer>(null);
-        }
     }
 }

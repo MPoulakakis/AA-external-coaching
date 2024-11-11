@@ -28,38 +28,25 @@ namespace AppointmentManagementSystem.Data.Repositories
 
         public Task<ReadOnlyCollection<Appointment>> GetAppointments() => Task.FromResult(_appointments.AsReadOnly());
 
-        public Task<bool> UpdateAppointment(int id, string updateField, string? updateValue = null, DateTime? updateDateValue = null, Customer? customer = null)
+        public Task UpdateAppointment(Appointment appointment)
         {
-            var foundAppointment = _appointments.Find(x => x.Id == id);
-            bool isUpdated = false;
+            var foundAppointment = _appointments.Find(x => x.Id == appointment.Id);
             if (foundAppointment is not null)
             {
-                switch (updateField) 
-                {
-                    case "Customer":
-                        foundAppointment.Customer = customer;
-                        break;
-                    case "Service Type":
-                        foundAppointment.ServiceType = updateValue;
-                        break;
-                    case "Appointment Date":
-                        foundAppointment.AppointmentDate = updateDateValue ?? default;
-                        break;
-                    case "Appointment Notes":
-                        foundAppointment.AppointmentNotes = updateValue;
-                        break;
-                }
-                isUpdated = true;
-                return Task.FromResult(isUpdated);
+                foundAppointment.ServiceType = appointment.ServiceType;
+                foundAppointment.AppointmentDate = appointment.AppointmentDate;
+                foundAppointment.AppointmentNotes = appointment.AppointmentNotes;
             }
-            return Task.FromResult(isUpdated);
+            return Task.CompletedTask;
         }
 
-        public Task<bool> AppointmentExists(int id)
+        public Task<Appointment> AppointmentExists(int id)
         {
             var foundAppointment = _appointments.Find(x => x.Id == id);
-            bool appointmentExists = foundAppointment is not null;
-            return Task.FromResult(appointmentExists);
+            if (foundAppointment is not null)
+                return Task.FromResult(foundAppointment);
+            else
+                return Task.FromResult<Appointment>(null);
         }
     }
 }

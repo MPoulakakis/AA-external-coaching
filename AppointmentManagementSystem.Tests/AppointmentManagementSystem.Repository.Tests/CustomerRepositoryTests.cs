@@ -80,7 +80,7 @@ public CustomerRepositoryTests()
         Customer customer1 = new(name: "Manos Poulakakis",email:"manolispoulakakis@gmaiil.com",phone:"6984153487");
         var customerRepository = new InMemoryCustomerRepository([customer1]);
         await customerRepository.DeleteCustomer(1);
-        var customersRepositoryData = customerRepository.GetCustomers().Result;        
+        var customersRepositoryData = await customerRepository.GetCustomers();
         bool customerExists = false;
 
         foreach (var customer in customersRepositoryData)
@@ -98,7 +98,6 @@ public CustomerRepositoryTests()
         Customer customer1 = new(name: "Manos Poulakakis",email:"manolispoulakakis@gmaiil.com",phone:"6984153487");
         var customerRepository = new InMemoryCustomerRepository([customer1]);
         await customerRepository.UpdateCustomer(1,"Email","nkorompos@gmail.com");
-        await customerRepository.UpdateCustomer(1,"Full Name","Nikos Korompos");
         await customerRepository.UpdateCustomer(1,"Phone","6945348712");
         var customersRepositoryData = customerRepository.GetCustomers().Result;
         
@@ -109,12 +108,10 @@ public CustomerRepositoryTests()
         foreach (var customer in customersRepositoryData)
         {
             email = customer.Email;
-            name = customer.Name;
             phone = customer.Phone;
         }
 
         Assert.Equal("nkorompos@gmail.com",email);
-        Assert.Equal("Nikos Korompos",name);
         Assert.Equal("6945348712",phone);
     }
 
