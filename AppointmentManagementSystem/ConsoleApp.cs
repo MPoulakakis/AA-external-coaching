@@ -168,14 +168,11 @@ namespace AppointmentManagementSystem.Utilities
         public static Appointment UpdateAppointmentFields(Appointment appointment)
         {
             foreach (var appointmentProperties in appointment.GetType().GetProperties())
-            {
-                AnsiConsole.Markup($"{appointmentProperties.Name} --> {appointmentProperties} --> {appointmentProperties.GetValue(appointment)}\n");   
+            {   
                 if(Enum.TryParse(appointmentProperties.Name,true, out AppointmentFields appointmentField))
-                
                 switch (appointmentField) 
                 {
                     case AppointmentFields.AppointmentDate:
-                        //string inputFormat = "DD/MM/YYYY h:mm:ss tt";
                         string inputFormat = "dd/MM/yyyy h:mm:ss tt";
                         string? inputDate = appointmentProperties.GetValue(appointment)?.ToString();
                         inputDate = inputDate?.Replace("πμ","am").Replace("μμ","pm");
