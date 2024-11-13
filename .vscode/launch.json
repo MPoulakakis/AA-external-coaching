@@ -13,8 +13,10 @@
             "args": [],
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
-            "console": "integratedTerminal"
+            "console": "externalTerminal",
+            "env": {
+                "SPECTRE_CONSOLE_ANSI": "true"
+            }
         }
     ]
-    
 }

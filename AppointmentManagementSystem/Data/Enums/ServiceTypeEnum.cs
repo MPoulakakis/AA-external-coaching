@@ -1,6 +1,6 @@
 namespace AppointmentManagementSystem.Data.Models
 {
-    public enum ServiceTypeEnum
+    public enum AppointmentType
     {
         PersonalTraining,
         Massage

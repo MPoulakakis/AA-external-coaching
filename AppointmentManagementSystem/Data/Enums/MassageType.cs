@@ -1,8 +1,9 @@
-namespace AppointmentManagementSystem.Data.Models;
-
-public enum MassageType
+namespace AppointmentManagementSystem.Data.Enums
 {
-    Relaxing,
-    Reflexology,
-    HotStone
+    public enum MassageType
+    {
+        Relaxing,
+        Reflexology,
+        HotStone
+    }
 }

@@ -3,11 +3,11 @@ using AppointmentManagementSystem.Data.Models;
 
 namespace AppointmentManagementSystem.Data.Abstractions;
 
-public interface IAppointmentRepository
+public interface IAppointmentRepository<T> where T : Appointment
 {
-    Task<ReadOnlyCollection<Appointment>> GetAppointments();
-    Task CreateAppointment(Appointment appointment);
-    Task UpdateAppointment(Appointment appointment);
+    Task<ReadOnlyCollection<T>> GetAppointments();
+    Task CreateAppointment(T appointment);
+    Task UpdateAppointment(T appointment);
     Task<bool> DeleteAppointment(int id);
-    Task<Appointment> AppointmentExists(int id);
+    Task<T> AppointmentExists(int id);
 }

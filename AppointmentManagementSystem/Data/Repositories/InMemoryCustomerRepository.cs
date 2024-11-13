@@ -6,9 +6,9 @@ using System.Collections.ObjectModel;
 
 namespace AppointmentManagementSystem.Data.Repositories;
 
-public class InMemoryCustomerRepository(List<Customer>? initialData = null) : ICustomerRepository
+public class InMemoryCustomerRepository() : ICustomerRepository
 {
-    private readonly List<Customer> _customers = initialData ?? [];
+    private readonly List<Customer> _customers = InitialData.GetInitialCustomers();
 
     public Task CreateCustomer(Customer customer)
     {

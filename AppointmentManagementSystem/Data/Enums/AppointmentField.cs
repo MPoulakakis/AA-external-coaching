@@ -1,9 +1,14 @@
-namespace AppointmentManagementSystem.Data.Models
+namespace AppointmentManagementSystem.Data.Enums
 {
     public enum AppointmentFields
     {
         AppointmentDate,
-        ServiceType,
-        AppointmentNotes
+        AppointmentNotes,
+        MassageType,
+        EmployeeGender,
+        Duration,
+        FocusedTraining,
+        InjuriesComments
+
     }
 }
