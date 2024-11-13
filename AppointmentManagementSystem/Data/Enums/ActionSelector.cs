@@ -1,4 +1,4 @@
-namespace AppointmentManagementSystem.Data.Models
+namespace AppointmentManagementSystem.Data.Enums
 {
     public enum ActionSelector
     {

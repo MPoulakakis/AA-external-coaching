@@ -1,8 +1,8 @@
 namespace AppointmentManagementSystem.Data.Enums
 {
-    public enum CustomerField
+    public enum EmployeeGender
     {
-        Email,
-        Phone
+        Female,
+        Male
     }
 }
