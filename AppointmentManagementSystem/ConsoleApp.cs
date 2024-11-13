@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using System.Globalization;
 using AppointmentManagementSystem.Data.Models;
 using Spectre.Console;
+using AppointmentManagementSystem.Data.Enums;
 
 namespace AppointmentManagementSystem.Utilities
 {
@@ -18,14 +19,27 @@ namespace AppointmentManagementSystem.Utilities
         return actionSelection;
         }
         
-        public static TimeSpan DurationSelector(TimeSpan[] TrainingDuration, string Title) 
+        public static int DurationSelector(int[] TrainingDuration)
         {
-            TimeSpan trainingDuration = AnsiConsole.Prompt(
-            new SelectionPrompt<TimeSpan>()
+            int trainingDuration = AnsiConsole.Prompt(
+            new SelectionPrompt<int>()
+            .Title($"[bold green]Select Session Duration[/]\n")
+            .PageSize(4)
+            .AddChoices(TrainingDuration));
+            return trainingDuration;
+        }
+
+        public static TEnum EnumSelector<TEnum>(string Title,string[] Choices) where TEnum: struct, Enum
+        {
+            string appointmentTypeSelection = AnsiConsole.Prompt(
+            new SelectionPrompt<string>()
             .Title($"[bold green]{Title}[/]\n")
             .PageSize(5)
-            .AddChoices(TrainingDuration));
-        return trainingDuration;
+            .AddChoices(Choices));
+
+            appointmentTypeSelection = appointmentTypeSelection.Replace(" ","");
+            Enum.TryParse(appointmentTypeSelection, true, out TEnum appointmentType);
+            return appointmentType;
         }
     // TODO: For all Cli Prompt Functions unify in class?
         
@@ -46,22 +60,13 @@ namespace AppointmentManagementSystem.Utilities
             DateTime promptValue = AnsiConsole.Prompt( new TextPrompt<DateTime>($"[bold green]{promptText}:[/] "));
             return promptValue;
         }
-        
-        public static TimeSpan CliTimePrompt(string promptText)
-        {
-            TimeSpan trainingDuration = AnsiConsole.Prompt(new TextPrompt<TimeSpan>("Duration Time")
-            .AddChoice(new TimeSpan(0,30,0))
-            .AddChoice(new TimeSpan(1,0,0))
-            .AddChoice(new TimeSpan(1,30,0))
-            );
-            return trainingDuration;
-        }
    
         public static int CliIntPrompt(string promptText)
         {
             int promptValue = AnsiConsole.Prompt( new TextPrompt<int>($"[bold green]{promptText}:[/] "));
             return promptValue;
         }
+
 
         public static Table CreateDataTable(string [] TableFields)
         {
@@ -165,80 +170,128 @@ namespace AppointmentManagementSystem.Utilities
             return customer;
         }
 
-        public static Appointment UpdateAppointmentFields(Appointment appointment)
-        {
-            foreach (var appointmentProperties in appointment.GetType().GetProperties())
-            {   
-                if(Enum.TryParse(appointmentProperties.Name,true, out AppointmentFields appointmentField))
-                switch (appointmentField) 
-                {
-                    case AppointmentFields.AppointmentDate:
-                        string inputFormat = "dd/MM/yyyy h:mm:ss tt";
-                        string? inputDate = appointmentProperties.GetValue(appointment)?.ToString();
-                        inputDate = inputDate?.Replace("πμ","am").Replace("μμ","pm");
-                        DateTime.TryParseExact(inputDate,inputFormat,CultureInfo.InvariantCulture, DateTimeStyles.None,out DateTime parsedDate);
-                        DateTime updateDate = AnsiConsole.Prompt( new TextPrompt<DateTime>($"Provide Updated Date [red][[MM/DD/YYYY HH:MM]][/]")
-                        .DefaultValue(parsedDate));
-                        appointment.AppointmentDate = updateDate;
-                        break;
-                
-                    case AppointmentFields.ServiceType:
-                        string defaultAppointment = appointmentProperties.GetValue(appointment)?.ToString() ?? string.Empty;
-                        Enum.TryParse(defaultAppointment, true, out ServiceTypeEnum defaultAppointmentType);
-                        string opossiteAppointment = string.Empty;
-                        
-                        switch (defaultAppointmentType) 
-                        {
-                            case ServiceTypeEnum.PersonalTraining:
-                                opossiteAppointment = "Massage";
-                                break;
-                        
-                            case ServiceTypeEnum.Massage:
-                                opossiteAppointment = "Personal Training";
-                                break;
-                        }
-                        string? updateServiceType = AnsiConsole.Prompt(
-                                new SelectionPrompt<string>()
-                                .Title($"[bold green]Please Provide Service Type[/]\n")
-                                .PageSize(3)
-                                .AddChoices([defaultAppointment!,opossiteAppointment]));
-                        
-                        if (updateServiceType is not null)
-                            appointment.ServiceType = updateServiceType;
-                        else
-                            throw new InvalidOperationException("No Valid Service type Selected");
-                        break;
-                
-                    case AppointmentFields.AppointmentNotes:
-                        string? defaultAppointmentNotes = appointmentProperties.GetValue(appointment)?.ToString();
-                        string? updatedAppointmentNotes = AnsiConsole.Prompt(new TextPrompt<string>("Provide the Updated Appointment Notes")
-                        .DefaultValue(defaultAppointmentNotes!)
-                        );
-                        appointment.AppointmentNotes = updatedAppointmentNotes;
-                        break;
-                }
 
+        public static Appointment UpdateAppointmentFields<T>( T appointment) where T : Appointment
+        {
+            if (appointment is PersonalTrainingAppointment personalTrainingList)
+            {
+                foreach(var appointmentProperties in appointment.GetType().GetProperties())
+                {
+                    if(Enum.TryParse(appointmentProperties.Name,true, out AppointmentFields appointmentField))
+                    switch (appointmentField) 
+                    {
+                        case AppointmentFields.AppointmentDate:
+                            string inputFormat = "dd/MM/yyyy h:mm:ss tt";
+                            string? inputDate = appointmentProperties.GetValue(appointment)?.ToString();
+                            DateTime updateDate = UpdateAppointmentDate(inputDate,inputFormat);
+                            personalTrainingList.AppointmentDate = updateDate;
+                            break;
+                    
+                        case AppointmentFields.AppointmentNotes:
+                            string? defaultAppointmentNotes = appointmentProperties.GetValue(appointment)?.ToString();
+                            string? updatedAppointmentNotes = AnsiConsole.Prompt(new TextPrompt<string>("Provide the Updated Appointment Notes")
+                                .DefaultValue(defaultAppointmentNotes!)
+                            );
+                            personalTrainingList.AppointmentNotes = updatedAppointmentNotes;
+                            break;
+                    
+                        case AppointmentFields.Duration:
+                            var duration = ConsoleApp.EnumSelector<trainingDuration>("Select Training Duration",["Thirty Minutes","Sixty Minutes", "Ninety Minutes"]);
+                            personalTrainingList.Duration = duration;
+                            break;
+
+                        case AppointmentFields.FocusedTraining:
+                            string focusedTraining  = ConsoleApp.CliTextPrompt("Focused Muscle Group(s)", isOptional:true);
+                            personalTrainingList.FocusedTraining = focusedTraining;
+                            break;
+
+                        case AppointmentFields.InjuriesComments:
+                            string injuriesComments = ConsoleApp.CliTextPrompt("Injury Report", isOptional:true);
+                            personalTrainingList.InjuriesComments = injuriesComments;
+                            break;
+                    }
+                    
+                }   
+                return personalTrainingList;
             }
-            return appointment;
+            else if (appointment is MassageAppointment massageAppointment)
+            {
+                foreach (var appointmentProperties in appointment.GetType().GetProperties())
+                {
+                    if(Enum.TryParse(appointmentProperties.Name,true, out AppointmentFields appointmentField))
+                    switch (appointmentField) 
+                    {
+                        case AppointmentFields.AppointmentDate:
+                            string inputFormat = "dd/MM/yyyy h:mm:ss tt";
+                            string? inputDate = appointmentProperties.GetValue(appointment)?.ToString();
+                            DateTime updateDate = UpdateAppointmentDate(inputDate,inputFormat);
+                            massageAppointment.AppointmentDate = updateDate;
+                            break;
+                    
+                        case AppointmentFields.AppointmentNotes:
+                            string? defaultAppointmentNotes = appointmentProperties.GetValue(appointment)?.ToString();
+                            string? updatedAppointmentNotes = AnsiConsole.Prompt(new TextPrompt<string>("Provide the Updated Appointment Notes")
+                                .DefaultValue(defaultAppointmentNotes!)
+                            );
+                            massageAppointment.AppointmentNotes = updatedAppointmentNotes;
+                            break;
+                    
+                        case AppointmentFields.MassageType:
+                            MassageType massageType = EnumSelector<MassageType>("Select Massage Type",["Relaxing","Reflexology","Hot Stone"]);
+                            massageAppointment.MassageType = massageType;
+                            break;
+
+                        case AppointmentFields.EmployeeGender:
+                            EmployeeGender employeeSex = EnumSelector<EmployeeGender>("Select Employee Sex",["Male","Female"]);
+                            massageAppointment.EmployeeSex = employeeSex;
+                            break;
+                    }
+                   
+                }
+                return massageAppointment;
+            }
+            else
+                return appointment;
         }
 
-        public static void ReadAppointmentsData(ReadOnlyCollection<Appointment> appointmentsList)
+        public static void ReadAppointmentsData<T>(ReadOnlyCollection<T> appointmentsList) where T : Appointment
         {
-            //Table appointmentTable = AppointmentCustomerDataTable();
+            Table massageTable = new();
+            Table personalTable = new();
             string color = "blue";
-            Table appointmentTable = CreateDataTable(["Id","Full Name","Service Type","Appointment Date","Appointment Notes"]);
-            foreach (Appointment appointment in appointmentsList.AsReadOnly())
+            massageTable = CreateDataTable(["Id","Full Name","Employee Gender","Massage Type","Appointment Date","Appointment Notes"]);
+            personalTable = CreateDataTable(["Id","Full Name","Training Duration","Appointment Date","Training Focus","Injuries","Appointment Notes"]);
+            foreach (var appointment in appointmentsList)
             {
-                appointmentTable.AddRow(
-                    new Markup($"[{color}]{appointment.Id}[/]"),
-                    new Markup($"[{color}]{appointment.Customer.Name}[/]"),
-                    new Markup($"[{color}]{appointment.ServiceType}[/]"),
-                    new Markup($"[{color}]{appointment.AppointmentDate}[/]"),
-                    new Markup($"[{color}]{appointment.AppointmentNotes}[/]")
+                if(appointment is MassageAppointment massageAppointment)
+                {
+                    massageTable.AddRow(
+                        new Markup($"[{color}]{massageAppointment.Id}[/]"),
+                        new Markup($"[{color}]{massageAppointment.Customer.Name}[/]"),
+                        new Markup($"[{color}]{AddSpacesToEnums(massageAppointment.EmployeeSex)}[/]"),
+                        new Markup($"[{color}]{massageAppointment.MassageType}[/]"),
+                        new Markup($"[{color}]{massageAppointment.AppointmentDate}[/]"),
+                        new Markup($"[{color}]{massageAppointment.AppointmentNotes}[/]")
                     );
 
+                }
+                else if (appointment is PersonalTrainingAppointment personalAppointment)
+                {
+                    personalTable.AddRow(
+                        new Markup($"[{color}]{personalAppointment.Id}[/]"),
+                        new Markup($"[{color}]{personalAppointment.Customer.Name}[/]"),
+                        new Markup($"[{color}]{AddSpacesToEnums(personalAppointment.Duration)}[/]"),
+                        new Markup($"[{color}]{personalAppointment.AppointmentDate}[/]"),
+                        new Markup($"[{color}]{personalAppointment.FocusedTraining}[/]"),
+                        new Markup($"[{color}]{personalAppointment.InjuriesComments}[/]"),
+                        new Markup($"[{color}]{personalAppointment.AppointmentNotes}[/]")
+                    );
+                }
             }
-            AnsiConsole.Write(appointmentTable);
+            massageTable.ShowRowSeparators();
+            personalTable.ShowRowSeparators();
+            AnsiConsole.Write(massageTable);
+            AnsiConsole.Write(personalTable);
         }
 
 
@@ -257,6 +310,23 @@ namespace AppointmentManagementSystem.Utilities
 
             }
             AnsiConsole.Write(customerTable);
+        }
+
+        public static string AddSpacesToEnums(Enum value)
+        {
+            string enumString = value.ToString();
+            string formattedString = Regex.Replace(enumString,"(\\B[A-Z])"," $1");
+            return formattedString;
+
+        }
+
+        public static DateTime UpdateAppointmentDate(string? inputDate, string inputFormat)
+        {
+            inputDate = inputDate?.Replace("πμ","am").Replace("μμ","pm");
+            DateTime.TryParseExact(inputDate,inputFormat,CultureInfo.InvariantCulture, DateTimeStyles.None,out DateTime parsedDate);
+            DateTime updateDate = AnsiConsole.Prompt( new TextPrompt<DateTime>($"Provide Updated Date [red][[MM/DD/YYYY HH:MM]][/]")
+            .DefaultValue(parsedDate));
+            return updateDate;
         }
 
     }
