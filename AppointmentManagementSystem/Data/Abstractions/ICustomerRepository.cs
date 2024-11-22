@@ -10,4 +10,6 @@ public interface ICustomerRepository
     Task UpdateCustomer(Customer customer);
     Task DeleteCustomer(int id);
     Task<Customer> CustomerExists(int id);
+    Task<int> GetCustomersCount();
+    Task<List<Customer>> GetCustomersByRegistrationDate(DateTime date);
 }

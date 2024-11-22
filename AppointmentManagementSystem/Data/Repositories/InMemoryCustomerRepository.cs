@@ -52,4 +52,19 @@ public class InMemoryCustomerRepository() : ICustomerRepository
         else
             return Task.FromResult<Customer>(null);
     }
+
+    public Task<int> GetCustomersCount()
+    {
+        int customerCount = _customers.Select(cs => cs).Count();
+        return Task.FromResult(customerCount);    
+    }
+
+    public Task<List<Customer>> GetCustomersByRegistrationDate(DateTime date)
+    {
+        var registeredCustomers = _customers
+        .Where(c => c.RegisteredDate.Date == date.Date)
+        .Select(c => c).ToList();
+
+        return Task.FromResult(registeredCustomers);
+    }
 }

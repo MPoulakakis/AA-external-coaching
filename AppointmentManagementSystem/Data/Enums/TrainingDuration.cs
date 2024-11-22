@@ -1,6 +1,6 @@
 namespace AppointmentManagementSystem.Data.Enums
 {
-    public enum trainingDuration
+    public enum TrainingDuration
     {
         ThirtyMinutes = 30,
         SixtyMinutes = 60,

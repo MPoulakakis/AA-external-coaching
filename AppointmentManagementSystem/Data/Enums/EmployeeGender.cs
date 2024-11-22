@@ -2,7 +2,7 @@ namespace AppointmentManagementSystem.Data.Enums
 {
     public enum EmployeeGender
     {
-        Female,
-        Male
+        Female = 0,
+        Male = 1,
     }
 }

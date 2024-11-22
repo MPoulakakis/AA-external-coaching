@@ -20,7 +20,7 @@ public AppointmentRepositoryTests()
     [Fact]
     public async void CreateAppointment_And_AddAtAppointmentRepository()
     {
-        var AppointmentRepository = new InMemoryAppointmentRepository();
+        var AppointmentRepository = new InMemoryAppointmentRepository<>();
         // AppointmentRepository.CreateAppointment(customer) 
     }
 }

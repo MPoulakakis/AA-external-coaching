@@ -24,7 +24,7 @@ public CustomerRepositoryTests()
         Customer customer1 = new(name: "Manos Poulakakis",email:"manolispoulakakis@gmaiil.com",phone:"6984153487");
         //Customer customer2 = new(name: "Giwrgos Tsaparas",email:"gtsap@gmaiil.com",phone:"6972894572");
         List<Customer> customers = [customer1];
-        var customerRepository = new InMemoryCustomerRepository(customers);
+        var customerRepository = new InMemoryCustomerRepository();
         // Act
         var customersRepositoryData = customerRepository.GetCustomers().Result;        
         // Assert
@@ -61,9 +61,7 @@ public CustomerRepositoryTests()
     public async Task CheckIfCustomerExists_OrNot()
     {
         // Arrange
-        Customer customer1 = new(name: "Manos Poulakakis",email:"manolispoulakakis@gmaiil.com",phone:"6984153487");
-        Customer customer2 = new(name: "Gtsap",email:"gtsap@gmaiil.com",phone:"2106523398");
-        var customerRepository = new InMemoryCustomerRepository([customer1,customer2]);
+        var customerRepository = new InMemoryCustomerRepository();
         //Act
         Customer customer = await customerRepository.CustomerExists(1);
         Customer customer3 = await customerRepository.CustomerExists(3);
@@ -78,7 +76,7 @@ public CustomerRepositoryTests()
     public async Task DeleteCustomerFromRepository()
     {
         Customer customer1 = new(name: "Manos Poulakakis",email:"manolispoulakakis@gmaiil.com",phone:"6984153487");
-        var customerRepository = new InMemoryCustomerRepository([customer1]);
+        var customerRepository = new InMemoryCustomerRepository();
         await customerRepository.DeleteCustomer(1);
         var customersRepositoryData = await customerRepository.GetCustomers();
         bool customerExists = false;
@@ -96,10 +94,10 @@ public CustomerRepositoryTests()
     public async Task UpdateCustomerInfoFromRepository()
     {
         Customer customer1 = new(name: "Manos Poulakakis",email:"manolispoulakakis@gmaiil.com",phone:"6984153487");
-        var customerRepository = new InMemoryCustomerRepository([customer1]);
+        var customerRepository = new InMemoryCustomerRepository();
         await customerRepository.UpdateCustomer(1,"Email","nkorompos@gmail.com");
         await customerRepository.UpdateCustomer(1,"Phone","6945348712");
-        var customersRepositoryData = customerRepository.GetCustomers().Result;
+        var customersRepositoryData = await customerRepository.GetCustomers();
         
         string email = customer1.Email;
         string name = customer1.Name;
