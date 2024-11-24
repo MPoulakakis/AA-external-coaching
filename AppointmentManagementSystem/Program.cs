@@ -1,4 +1,5 @@
-﻿using AppointmentManagementSystem;
+﻿using System.Diagnostics.CodeAnalysis;
+using AppointmentManagementSystem;
 using AppointmentManagementSystem.Data.Abstractions;
 using AppointmentManagementSystem.Data.Enums;
 using AppointmentManagementSystem.Data.Models;
@@ -30,10 +31,7 @@ class Program
         int customerId;
         int appointmentId;
         ReportSelector report;
-        CustomerReportsService customerViewModel = new(customerRepository); 
-        AppointmentReportService appointmentViewModel = new(appointmentRepository); 
-        
-
+        ConsoleApp2 console = new();
         do
         {
             //operation = ConsoleApp.Selector(operationSelector, "Please Select Action to be executed or Exit to close the application");
@@ -187,122 +185,74 @@ class Program
                     do
                     {
                         report = ConsoleApp.EnumSelector<ReportSelector>("Select Report Operation or Return to Go Back");
-                        string mainColor = "bold blue";
-                        string fillerColor = "bold grey100";
                         switch (report)
                         {
                             case ReportSelector.RegisteredCustomers:
-                                ConsoleApp.CliWriteToUser($"We have [{fillerColor}]{await customerRepository.GetCustomersCount()}[/] Registered Customers",mainColor);
+                                console.DisplayToUser($"We have [{console.FillerColor}]{await customerRepository.GetCustomersCount()}[/] Registered Customers",console.MainColor);
                                 break;
                         
                             case ReportSelector.CustomersByRegistrationDate:
                                 DateTime date = ConsoleApp.CliDatePrompt("Provide Date for Register Report");
                                 var registeredCustomers = await customerRepository.GetCustomersByRegistrationDate(date);
-                                    ConsoleApp.ReadCustomerData(registeredCustomers.AsReadOnly());
+                                ConsoleApp.ReadCustomerData(registeredCustomers.AsReadOnly());
                                 break;
                         
                             case ReportSelector.CountAppointments:
                                 int appointmentCount = await appointmentRepository.GetAppointmentsCount<Appointment>();
-                                ConsoleApp.CliWriteToUser($"We Have [{fillerColor}]{appointmentCount}[/] Total Appointments",mainColor);
+                                console.DisplayToUser($"We Have [{console.FillerColor}]{appointmentCount}[/] Total Appointments",console.MainColor);
                                 break;
                         
                             case ReportSelector.CountMassageAppointments:
                                 int massageCount = await appointmentRepository.GetAppointmentsCount<MassageAppointment>();
-                                ConsoleApp.CliWriteToUser($"We Have [{fillerColor}]{massageCount}[/] Total Massage Appointments",mainColor);
+                                console.DisplayToUser($"We Have [{console.FillerColor}]{massageCount}[/] Total Massage Appointments",console.MainColor);
                                 break;
                         
                             case ReportSelector.CountPersonalAppointments:
                                 int personalCount = await appointmentRepository.GetAppointmentsCount<PersonalTrainingAppointment>();
-                                ConsoleApp.CliWriteToUser($"We Have [{fillerColor}]{personalCount}[/] Total Personal Appointments",mainColor);
+                                console.DisplayToUser($"We Have [{console.FillerColor}]{personalCount}[/] Total Personal Appointments",console.MainColor);
                                 break;
                         
                             case ReportSelector.EmployeeGenderPreference:
                                 int preference = await appointmentRepository.GetEmployeeGenderPreference();
-                                if (preference == 2)
-                                    ConsoleApp.CliWriteToUser($"Users Prefer Both [{fillerColor}]Male[/] and [{fillerColor}]Female[/] Massauer Equally",mainColor);
-                                else
-                                    ConsoleApp.CliWriteToUser($"Users Prefer [{fillerColor}]{(EmployeeGender)preference}[/] Massauer",mainColor);
+                                console.DisplayEmployeGenderPreference(preference);
+
                                 break;
                         
                             case ReportSelector.TrainingDurationPreference:
+                                // DisplayTrainingDurationPreference
                                 var durations = await appointmentRepository.GetTrainingDuration();
-                                if (durations.Count > 1)
-                                {
-                                    ConsoleApp.CliWriteToUser("Customers Prefers More Than One Training Duration",mainColor);
-                                    foreach(var duration in durations)
-                                        ConsoleApp.CliWriteToUser($"{ConsoleApp.AddSpacesToEnums(duration)}",$"{fillerColor}");
-                                }
-                                else
-                                    ConsoleApp.CliWriteToUser($"Most Prefered Training duration is [{fillerColor}]{ConsoleApp.AddSpacesToEnums(durations[0])}[/]");
-                                    break;
+                                console.TrainingDurationPreference(durations);
+                                break;
                         
                         
                             case ReportSelector.MaxMassageAppointmentsDate:
+                                //DisplayDateOfMaxAppointments()
                                 var prefMassageDates = await appointmentRepository.GetPreferedMassageDates();
-                                if (prefMassageDates.Count > 1 && prefMassageDates.Count != 0)
-                                {
-                                    ConsoleApp.CliWriteToUser($"Dates with Most Massage Appointments are",mainColor);
-                                    foreach (var dates in prefMassageDates)
-                                    {
-                                        ConsoleApp.CliWriteToUser($"{dates} ({dates.DayOfWeek})",fillerColor);
-                                    }
-                                }
-                                else if ( prefMassageDates.Count == 1)
-                                    ConsoleApp.CliWriteToUser($"Date with Most Massage Appointments is : [{fillerColor}]{prefMassageDates[0]} ({prefMassageDates[0].DayOfWeek})[/]");
+                                console.DisplayMaxAppointmentDate<MassageAppointment>(prefMassageDates);
                                     break;
                         
                         
                             case ReportSelector.MaxPersonalAppointmentsDate:
+                                //DisplayDateOfMaxAppointments
                                 var prefPersonalDates = await appointmentRepository.GetPreferedPersonalDates();
-                                if (prefPersonalDates.Count > 1)
-                                {
-                                    ConsoleApp.CliWriteToUser($"Dates with Most Personal Training Appointments are", mainColor);
-                                    foreach (var dates in prefPersonalDates)
-                                    {
-                                        ConsoleApp.CliWriteToUser($"{dates} ({dates.DayOfWeek})",fillerColor);
-                                    }
-                                }
-                                else if (prefPersonalDates.Count == 1)
-                                    ConsoleApp.CliWriteToUser($"Date with Most Personal Training Appointments is : [{fillerColor}]{prefPersonalDates[0]} ({prefPersonalDates[0].DayOfWeek})[/]");
+                                console.DisplayMaxAppointmentDate<PersonalTrainingAppointment>(prefPersonalDates);
                                 break;
                         
                         
                             case ReportSelector.MassageTypePreference:
+                                //DisplayMassageTypePreference
                                 var prefMassageType = await appointmentRepository.GetPreferedMassageType();
-                                if (prefMassageType.Count > 1)
-                                    ConsoleApp.CliWriteToUser("Prefered Massaged Types are",mainColor);
-                                    foreach (var type in prefMassageType )
-                                    {
-                                        ConsoleApp.CliWriteToUser($"{type}",fillerColor);
-                                    }                               
+                                console.DisplayMassageTypePreference(prefMassageType);
                                 break;
                         
                             case ReportSelector.MaxAppointmentsDate:
                                 var maxAppointmentsDate = await appointmentRepository.GetDateWithMostAppointments();
-                                if(maxAppointmentsDate.Count > 1)
-                                {
-                                    ConsoleApp.CliWriteToUser($"Dates with Most Appointments are",mainColor);
-                                    foreach (var d in maxAppointmentsDate)
-                                    {
-                                        ConsoleApp.CliWriteToUser($"{d} ({d.DayOfWeek})",fillerColor);
-                                    }
-                                }
-                                else
-                                    ConsoleApp.CliWriteToUser($"Date with Most Appointments is {maxAppointmentsDate[0]} ({maxAppointmentsDate[0].DayOfWeek})",mainColor);
+                                console.DisplayMaxAppointmentDate<Appointment>(maxAppointmentsDate);
                                 break;
                         
                             case ReportSelector.MinAppointmentsDate:
                                 var minAppointmentsDate = await appointmentRepository.GetDateWithLeastAppointments();
-                                if(minAppointmentsDate.Count > 1)
-                                {
-                                    ConsoleApp.CliWriteToUser($"Dates with Least Appointments are",mainColor);
-                                    foreach (var d in minAppointmentsDate)
-                                    {
-                                        ConsoleApp.CliWriteToUser($"{d} ({d.DayOfWeek})",fillerColor);
-                                    }
-                                }
-                                else
-                                    ConsoleApp.CliWriteToUser($"Date with Least Appointments is {minAppointmentsDate[0]} ({minAppointmentsDate[0].DayOfWeek})",mainColor);
+                                console.DisplayMinAppointmentDate<Appointment>(minAppointmentsDate);
                                 break;
                         
                             case ReportSelector.Return:
