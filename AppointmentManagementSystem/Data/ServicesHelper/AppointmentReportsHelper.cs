@@ -51,5 +51,4 @@ public static class AppointmentReportsHelper
         .OfType<MassageAppointment>()
         .GroupBy(appointment => appointment.MassageType);
     }
-
 }

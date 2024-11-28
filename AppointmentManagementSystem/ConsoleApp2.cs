@@ -24,7 +24,7 @@ public class ConsoleApp2
         {
             DisplayToUser($"Date(s) With Most {appointmentName}",MainColor);
             foreach (var date in dates)
-                DisplayToUser($"{date} ({date.DayOfWeek})",FillerColor);
+                DisplayToUser($"{date.ToShortDateString()} ({date.DayOfWeek})",FillerColor);
         }        
         else
             DisplayToUser($"No {appointmentName} Found ",Error);
@@ -37,7 +37,7 @@ public class ConsoleApp2
         {
             DisplayToUser($"Date(s) With Least {appointmentName}",MainColor);
             foreach (var date in dates)
-                DisplayToUser($"{date} ({date.DayOfWeek})",FillerColor);
+                DisplayToUser($"{date.ToShortDateString()} ({date.DayOfWeek})",FillerColor);
         }        
         else 
             DisplayToUser($"No {appointmentName} Found",Error);
